@@ -38,4 +38,4 @@ print("Listing rows after Residential filter:", len(listing_residential))
 sold_residential.to_csv("CRMLSSold2024_2026.csv", index=False)
 listing_residential.to_csv("CRMLSListing2024_2026.csv", index=False)
 
-print("Final CSV files saved successfully!")
+print("\nData aggregation and Residential property filtering completed successfully.")
