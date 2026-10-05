@@ -3,8 +3,8 @@ import glob
 import os
 
 #Find all monthly sold and listing CSV files
-sold_files=glob.glob("CRMLSSold*.csv")
-listing_files=glob.glob("CRMLSListing*.csv")
+sold_files = glob.glob("CRMLSSold202[4-6][0-9][0-9].csv")
+listing_files = glob.glob("CRMLSListing202[4-6][0-9][0-9].csv")
 
 # Check how many files were found
 print("Sold files found:", len(sold_files))
