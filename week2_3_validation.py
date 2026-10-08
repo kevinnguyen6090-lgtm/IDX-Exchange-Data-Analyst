@@ -1,5 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
+os.makedirs("eda_plots", exist_ok=True)
 
 # Load the final residential datasets from week 1
 sold = pd.read_csv("CRMLSSold2024_2026.csv")
@@ -145,5 +148,96 @@ plt.title("Distribution of Listing Prices")
 plt.xlabel("List Price")
 plt.ylabel("Frequency")
 plt.show()
+
+# Numeric fields required for Weeks 2-3 EDA
+numeric_fields = [
+    "ClosePrice",
+    "ListPrice",
+    "OriginalListPrice",
+    "LivingArea",
+    "LotSizeAcres",
+    "BedroomsTotal",
+    "BathroomsTotalInteger",
+    "DaysOnMarket",
+    "YearBuilt"
+]
+
+# Numeric summaries for Sold and Listing datasets
+print("\nSold numeric summaries:")
+print(sold[numeric_fields].describe())
+
+print("\nLisitng numeric summaries:")
+print(listing[numeric_fields].describe())
+
+# Generate histograms for all numeric fields
+for column in numeric_fields:
+    for name, df in [("Sold", sold), ("Listing", listing)]:
+        values = pd.to_numeric(df[column], errors="coerce").dropna()
+
+        plt.figure(figsize=(8, 5))
+        plt.hist(values, bins=50)
+        plt.title(f"{name} - {column} Distrbution")
+        plt.xlabel(column)
+        plt.ylabel("frequency")
+        plt.tight_layout()
+        plt.savefig(f"eda_plots/{name}_{column}_histogram.png")
+        plt.close()
+
+# Generate boxplots for all numeric fields
+for column in numeric_fields:
+    for name, df in [("Sold", sold), ("Listing", listing)]:
+        values = pd.to_numeric(df[column], errors="coerce").dropna()
+
+        plt.figure(figsize=(8, 5))
+        plt.boxplot(values)
+        plt.title(f"{name} - {column} Boxplot")
+        plt.ylabel(column)
+        plt.tight_layout()
+        plt.savefig(f"eda_plots/{name}_{column}_boxplot.png")
+        plt.close()
+
+# Average and median sold prices
+print("\nAverage Sold price:")
+print(sold["ClosePrice"].mean())
+
+print("\nMedian Sold Price:")
+print(sold["ClosePrice"].median())
+
+# Percentage of homes sold above, below, and at list price
+valid_sales = sold[
+    (sold["ClosePrice"].notna()) &
+    (sold["ListPrice"].notna()) &
+    (sold["ListPrice"] > 0)
+]
+
+above_list = (valid_sales["ClosePrice"] > valid_sales["ListPrice"]).mean() * 100
+below_list = (valid_sales["ClosePrice"] < valid_sales["ListPrice"]).mean() * 100
+at_list = (valid_sales["ClosePrice"] == valid_sales["listPrice"]).mean() * 100
+
+print("\nHomes sold above list price:", round(above_list, 2), "%")
+print("Homes sold below list price:", round(below_list, 2) "%")
+print("Homes sold at list price:", round(at_list, 2), "%")
+
+# Days on market analysis
+print("\nDays on Market Summary")
+print(sold["DaysOnMarket"].describe())
+
+print("\nMedian Days on Market:")
+print(sold["DaysOnMarket"].median())
+
+priint("\nAverage Days on Market:")
+print(sold["DaysOnMarket"].mean())
+
+# Check for date inconsistencies
+sold["CloseDate"] = pd.to_datatime(sold["CloseDate"], errors="coerce")
+sold["ListingContractDate"] = pd.to_datatime(
+    sold["ListingContractDate"], errors="coerce"
+)
+
+invalid_dates= sold[
+    sold["CloseDate"] < sold["ListingContractDate"]
+]
+
+print("\nHomes with closing dates before listing dates:", len(invalid_dates))
 
 print("\nData validation and exploratory analysis completed successfully.")
