@@ -1,6 +1,6 @@
 import pandas as pd
 import glob
-import os
+
 
 #Find all monthly sold and listing CSV files
 sold_files = glob.glob("CRMLSSold202[4-6][0-9][0-9].csv")
@@ -22,7 +22,7 @@ listing_combined = pd.concat(listing_dataframes, ignore_index=True)
 print("Combined sold rows:", len(sold_combined))
 print("Combined listing rows:", len(listing_combined))
 
-#Filter both datasets to Residental properties only
+#Filter both datasets to Residential properties only
 sold_residential = sold_combined[sold_combined["PropertyType"] == "Residential"]
 listing_residential = listing_combined[listing_combined["PropertyType"] == "Residential"]
 
