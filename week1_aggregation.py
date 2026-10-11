@@ -26,7 +26,6 @@ print("Combined listing rows:", len(listing_combined))
 sold_residential = sold_combined[sold_combined["PropertyType"] == "Residential"]
 listing_residential = listing_combined[listing_combined["PropertyType"] == "Residential"]
 
-
 # Show row counts before and after filtering
 print("Sold rows before filter:", len(sold_combined))
 print("Sold rows after Residential filter:", len(sold_residential))

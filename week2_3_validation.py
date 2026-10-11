@@ -1,8 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import glob
 
 os.makedirs("eda_plots", exist_ok=True)
+
+# Load the original sold files before residential filtering
+sold_files=glob.glob("CRMLSSold202[4-6][0-9][0-9].csv")
+sold_combined=pd.concat(
+    [pd.read_csv(file, low_memory=False) for file in sold_files],
+    ignore_index=True
+)
 
 # Load the final residential datasets from week 1
 sold = pd.read_csv("CRMLSSold2024_2026.csv")
@@ -212,10 +220,10 @@ valid_sales = sold[
 
 above_list = (valid_sales["ClosePrice"] > valid_sales["ListPrice"]).mean() * 100
 below_list = (valid_sales["ClosePrice"] < valid_sales["ListPrice"]).mean() * 100
-at_list = (valid_sales["ClosePrice"] == valid_sales["listPrice"]).mean() * 100
+at_list = (valid_sales["ClosePrice"] == valid_sales["ListPrice"]).mean() * 100
 
 print("\nHomes sold above list price:", round(above_list, 2), "%")
-print("Homes sold below list price:", round(below_list, 2) "%")
+print("Homes sold below list price:", round(below_list, 2), "%")
 print("Homes sold at list price:", round(at_list, 2), "%")
 
 # Days on market analysis
@@ -225,12 +233,12 @@ print(sold["DaysOnMarket"].describe())
 print("\nMedian Days on Market:")
 print(sold["DaysOnMarket"].median())
 
-priint("\nAverage Days on Market:")
+print("\nAverage Days on Market:")
 print(sold["DaysOnMarket"].mean())
 
 # Check for date inconsistencies
-sold["CloseDate"] = pd.to_datatime(sold["CloseDate"], errors="coerce")
-sold["ListingContractDate"] = pd.to_datatime(
+sold["CloseDate"] = pd.to_datetime(sold["CloseDate"], errors="coerce")
+sold["ListingContractDate"] = pd.to_datetime(
     sold["ListingContractDate"], errors="coerce"
 )
 
@@ -239,5 +247,48 @@ invalid_dates= sold[
 ]
 
 print("\nHomes with closing dates before listing dates:", len(invalid_dates))
+
+# Finding counties with the highest median sold prices
+county_prices= (
+    sold.groupby("CountyOrParish")["ClosePrice"]
+    .median()
+    .sort_values(ascending=False)
+)
+
+print("\nTop 10 counties by median sold price:")
+print(county_prices.head(10))
+
+# Property type distribution before filtering
+property_counts = sold_combined["PropertyType"].value_counts()
+property_percentages = sold_combined["PropertyType"].value_counts(normalize=True) *100
+
+print("\nProperty types found:")
+print(property_counts)
+
+print("\nProperty type percentages:")
+print(property_percentages.round(2))
+
+# Seperate market analysis fields from meta data
+market_fields=[
+    "ClosePrice",
+    "ListPrice",
+    "OriginalListPrice",
+    "LivingArea",
+    "LotSizeAcres",
+    "BedroomsTotal",
+    "BathroomsTotalInteger",
+    "DaysOnMarket",
+    "YearBuilt"
+]
+
+metadata_fields= [
+    col for col in sold.columns if col not in market_fields
+]
+
+print("\nMarket analysis fields:")
+print(market_fields)
+
+print("\nOther fields (including metadata):")
+print(metadata_fields)
 
 print("\nData validation and exploratory analysis completed successfully.")
