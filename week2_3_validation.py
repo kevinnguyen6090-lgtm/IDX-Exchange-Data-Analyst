@@ -291,4 +291,86 @@ print(market_fields)
 print("\nOther fields (including metadata):")
 print(metadata_fields)
 
+# Mortgage rate enrichment
+# Download historical 30-year fixed mortgage rates from FRED
+
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US"
+
+mortgage = pd.read_csv(url)
+
+print("\nMortgage rate data:")
+print(mortgage.head())
+print("\nMortgage rate columns:")
+print(mortgage.columns.tolist())
+
+# Convert mortgage dates to datetime
+mortgage["observation_date"] = pd.to_datetime(
+    mortgage["observation_date"]
+)
+
+# Create a year-month column
+mortgage["year_month"] = mortgage["observation_date"].dt.to_period("M")
+
+# Calculate average mortgage rate for each month
+monthly_mortgage = (
+    mortgage.groupby("year_month")["MORTGAGE30US"]
+    .mean()
+    .reset_index()
+)
+
+print("\nMonthly mortgage rate averages:")
+print(monthly_mortgage.tail(12))
+
+# Create year-month columns for matching mortgage rates
+sold["year_month"] = sold["CloseDate"].dt.to_period("M")
+
+listing["ListingContractDate"] = pd.to_datetime(
+    listing["ListingContractDate"], errors="coerce"
+)
+
+listing["year_month"] = listing["ListingContractDate"].dt.to_period("M")
+
+print("\nSold year-month:")
+print(sold["year_month"].head())
+
+print("\nListing year-month:")
+print(listing["year_month"].head())
+
+# Merge monthly mortgage rates into both datasets
+sold_enriched = sold.merge(
+    monthly_mortgage,
+    on="year_month",
+    how="left",
+    validate="many_to_one"
+)
+
+listing_enriched = listing.merge(
+    monthly_mortgage,
+    on="year_month",
+    how="left",
+    validate="many_to_one"
+)
+
+print("\nSold enriched shape:", sold_enriched.shape)
+print("Listing enriched shape:", listing_enriched.shape)
+
+print("\nSold mortgage rates missing:",
+      sold_enriched["MORTGAGE30US"].isna().sum())
+
+print("Listing mortgage rates missing:",
+      listing_enriched["MORTGAGE30US"].isna().sum())
+
+# Save datasets with monthly mortgage rates
+sold_enriched.to_csv(
+    "CRMLSSold2024_2026_enriched.csv",
+    index=False
+)
+
+listing_enriched.to_csv(
+    "CRMLSListing2024_2026_enriched.csv",
+    index=False
+)
+
+print("\nEnriched datasets saved successfully!")
+
 print("\nData validation and exploratory analysis completed successfully.")
