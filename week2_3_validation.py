@@ -68,6 +68,7 @@ plt.hist(sold[sold["ClosePrice"] <= 10000000]["ClosePrice"].dropna(), bins=50)
 plt.title("Distribution of Sold Prices")
 plt.xlabel("Close Price")
 plt.ylabel("Frequency")
+plt.savefig("eda_plots/Sold_Price_Distribution")
 plt.show()
 
 # Display Listing price distribution
@@ -75,6 +76,7 @@ plt.hist(listing[listing["ListPrice"] <= 10000000]["ListPrice"].dropna(), bins=5
 plt.title("Distribution of Listing Prices")
 plt.xlabel("List Price")
 plt.ylabel("Frequency")
+plt.savefig("eda_plots/Listing_Price_Distribution.png")
 plt.show()
 
 for name, df in datasets.items():
@@ -176,5 +178,5 @@ for name, df in {"Sold": sold_enriched, "Listing": listing_enriched}.items():
 
 sold_enriched.to_csv("CRMLSSold2024_2026_enriched.csv", index=False)
 listing_enriched.to_csv("CRMLSListing2024_2026_enriched.csv", index=False)
-print("\nEnriched datasets saved successfully!")
+print("\nEnriched datasets saved.")
 print("Data validation and exploratory analysis completed successfully.")
