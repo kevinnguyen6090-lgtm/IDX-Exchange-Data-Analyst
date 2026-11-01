@@ -140,4 +140,92 @@ for name, df in [("Sold", sold), ("Listing", listing)]:
     print(f"{name} numeric types:")
     print(df[numeric_columns].dtypes)
 
-    
+# Check date consistency
+for name, df in [("Sold", sold), ("Listing", listing)]:
+
+    # Flag properties listed after their closing date
+    df["listing_after_close_flag"] = (
+        df["ListingContractDate"] > df["CloseDate"]
+    )
+
+    # Flag purchase contracts dated after closing
+    df["purchase_after_close_flag"] = (
+        df["PurchaseContractDate"] > df["CloseDate"]
+    )
+
+    # Flag listings dated after the purchase contract
+    df["negative_timeline_flag"] = (
+        df["ListingContractDate"] > df["PurchaseContractDate"]
+    )
+
+    print(f"\n{name} date consistency checks:")
+    print("Listing after close:", df["listing_after_close_flag"].sum())
+    print("Purchase after close:", df["purchase_after_close_flag"].sum())
+    print("Listing after purchase:", df["negative_timeline_flag"].sum())
+
+# Geographic data validation
+for name, df in [("Sold", sold), ("Listing", listing)]:
+
+    # Flag missing coordinates
+    df["missing_coordinates_flag"] = (
+        df["Latitude"].isna() | df["Longitude"].isna()
+    )
+
+    # Flag coordinates equal to zero
+    df["zero_coordinates_flag"] = (
+        (df["Latitude"] == 0) | (df["Longitude"] == 0)
+    )
+
+    # Flag positive longitude
+    df["positive_longitude_flag"] = df["Longitude"] > 0
+
+    # Flag coordinates outside California's approximate boundaries
+    df["invalid_location_flag"] = (
+        df["Latitude"].notna() &
+        df["Longitude"].notna() &
+        (
+            ~df["Latitude"].between(32, 42) |
+            ~df["Longitude"].between(-125, -114)
+        )
+    )
+
+    print(f"\n{name} geographic validation:")
+    print("Missing coordinates:", df["missing_coordinates_flag"].sum())
+    print("Zero coordinates:", df["zero_coordinates_flag"].sum())
+    print("Positive longitude:", df["positive_longitude_flag"].sum())
+    print("Outside California boundaries:", df["invalid_location_flag"].sum())
+
+# Export cleaned datasets
+sold.to_csv("CRMLSSold2024_2026_cleaned.csv", index=False)
+listing.to_csv("CRMLSListing2024_2026_cleaned.csv", index=False)
+
+print("\nCleaned datasets saved successfully.")
+print("Final Sold dataset:", sold.shape)
+print("Final Listing dataset:", listing.shape)
+
+# Verifying exported datasets
+sold_check = pd.read_csv("CRMLSSold2024_2026_cleaned.csv", low_memory=False)
+listing_check = pd.read_csv("CRMLSListing2024_2026_cleaned.csv", low_memory=False)
+
+print("\nExport verification:")
+print("Sold matches:", sold_check.shape == sold.shape)
+print("Listing matches:", listing_check.shape == listing.shape)
+
+# Before and after cleaning summary
+
+print("\n=== DATA CLEANING SUMMARY ===")
+
+print("\nSold Dataset:")
+print("Original rows: 494521")
+print("Final rows:", len(sold))
+print("Original columns: 86")
+print("Final columns:", len(sold.columns))
+
+print("\nListing Dataset:")
+print("Original rows: 650390")
+print("Final rows:", len(listing))
+print("Original columns: 86")
+print("Final columns:", len(listing.columns))
+
+print("\nCleaning process completed.")
+
