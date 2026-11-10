@@ -1,0 +1,66 @@
+IDX Exchange Week 7: Outlier Detection and Data Quality
+
+Methodology:
+The Interquartile Range (IQR) method was applied separately
+to the sold and listing datasets for ClosePrice,
+LivingArea, and DaysOnMarket.
+
+Lower bound = Q1 - 1.5 * IQR
+Upper bound = Q3 + 1.5 * IQR
+
+Records outside these bounds were flagged as outliers.
+Invalid values were identified using business rules.
+All original records were preserved in full flagged datasets.
+Separate clean datasets were created for analysis.
+
+Missing ClosePrice values were not automatically
+classified as outliers because unsold listings may
+not have a closing price.
+
+Flagged records may represent legitimate transactions.
+Percentile thresholds should be reviewed before
+making business decisions.
+
+SOLD DATASET
+Original records: 494,521
+Clean records: 417,892
+Excluded records: 76,629
+Excluded percentage: 15.50%
+
+ClosePrice:
+Median before: 820,000.00
+Median after: 785,000.00
+
+LivingArea:
+Median before: 1,647.00
+Median after: 1,574.00
+
+DaysOnMarket:
+Median before: 19.00
+Median after: 16.00
+
+LISTING DATASET
+Original records: 650,390
+Clean records: 549,537
+Excluded records: 100,853
+Excluded percentage: 15.51%
+
+ClosePrice:
+Median before: 855,000.00
+Median after: 825,000.00
+
+LivingArea:
+Median before: 1,671.00
+Median after: 1,611.00
+
+DaysOnMarket:
+Median before: 11.00
+Median after: 10.00
+
+Conclusion:
+The clean datasets exclude records flagged by the
+IQR method or the specified invalid-value rules.
+The full flagged datasets preserve all original rows
+for future review and analysis.
+The comparison shows how filtering affects
+dataset sizes and median values.
